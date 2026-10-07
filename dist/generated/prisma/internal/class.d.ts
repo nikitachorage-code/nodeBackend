@@ -33,10 +33,28 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
     get user(): Prisma.UserDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;
+    get emailToken(): Prisma.EmailTokenDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    get step(): Prisma.StepDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    get field(): Prisma.FieldDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    get profileAnswer(): Prisma.ProfileAnswerDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
     get certification(): Prisma.CertificationDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;
-    get refreshToken(): Prisma.RefreshTokenDelegate<ExtArgs, {
+    get storedFile(): Prisma.StoredFileDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    get setting(): Prisma.SettingDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    get auditLog(): Prisma.AuditLogDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;
 }

@@ -1,4 +1,10 @@
 export type * from './models/User.js';
+export type * from './models/EmailToken.js';
+export type * from './models/Step.js';
+export type * from './models/Field.js';
+export type * from './models/ProfileAnswer.js';
 export type * from './models/Certification.js';
-export type * from './models/RefreshToken.js';
+export type * from './models/StoredFile.js';
+export type * from './models/Setting.js';
+export type * from './models/AuditLog.js';
 export type * from './commonInputTypes.js';

@@ -1,10 +1,26 @@
 export const Role = {
     ADMIN: 'ADMIN',
+    USER: 'USER'
+};
+export const UserStatus = {
     CANDIDATE: 'CANDIDATE',
-    DIPLOMAT: 'DIPLOMAT'
+    DIPLOMATE: 'DIPLOMATE'
 };
 export const CertificationStatus = {
-    IN_PROGRESS: 'IN_PROGRESS',
-    COMPLETED: 'COMPLETED'
+    ACTIVE: 'ACTIVE',
+    LAPSED: 'LAPSED'
+};
+export const FieldType = {
+    TEXT: 'TEXT',
+    LONG_TEXT: 'LONG_TEXT',
+    NUMBER: 'NUMBER',
+    DATE: 'DATE',
+    DROPDOWN: 'DROPDOWN',
+    CHECKBOX: 'CHECKBOX',
+    FILE: 'FILE'
+};
+export const EmailTokenType = {
+    VERIFY: 'VERIFY',
+    RESET: 'RESET'
 };
 //# sourceMappingURL=enums.js.map

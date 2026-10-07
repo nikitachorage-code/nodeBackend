@@ -25,8 +25,14 @@ export const JsonNull = runtime.JsonNull;
 export const AnyNull = runtime.AnyNull;
 export const ModelName = {
     User: 'User',
+    EmailToken: 'EmailToken',
+    Step: 'Step',
+    Field: 'Field',
+    ProfileAnswer: 'ProfileAnswer',
     Certification: 'Certification',
-    RefreshToken: 'RefreshToken'
+    StoredFile: 'StoredFile',
+    Setting: 'Setting',
+    AuditLog: 'AuditLog'
 };
 export const TransactionIsolationLevel = runtime.makeStrictEnum({
     ReadUncommitted: 'ReadUncommitted',
@@ -38,39 +44,111 @@ export const UserScalarFieldEnum = {
     id: 'id',
     email: 'email',
     passwordHash: 'passwordHash',
-    firstName: 'firstName',
-    lastName: 'lastName',
     role: 'role',
-    isActive: 'isActive',
+    name: 'name',
+    status: 'status',
+    emailVerifiedAt: 'emailVerifiedAt',
+    onboardedAt: 'onboardedAt',
+    cycleStartDate: 'cycleStartDate',
+    cycleNo: 'cycleNo',
+    progressCount: 'progressCount',
+    atRisk: 'atRisk',
+    warningSentCycle: 'warningSentCycle',
+    passportNo: 'passportNo',
+    lastCertNo: 'lastCertNo',
     createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
+};
+export const EmailTokenScalarFieldEnum = {
+    id: 'id',
+    userId: 'userId',
+    type: 'type',
+    tokenHash: 'tokenHash',
+    expiresAt: 'expiresAt',
+    usedAt: 'usedAt',
+    createdAt: 'createdAt'
+};
+export const StepScalarFieldEnum = {
+    id: 'id',
+    key: 'key',
+    title: 'title',
+    order: 'order',
+    enabled: 'enabled',
+    system: 'system',
+    repeatable: 'repeatable',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+export const FieldScalarFieldEnum = {
+    id: 'id',
+    stepId: 'stepId',
+    key: 'key',
+    label: 'label',
+    type: 'type',
+    required: 'required',
+    helpText: 'helpText',
+    visible: 'visible',
+    options: 'options',
+    order: 'order',
+    system: 'system',
+    archivedAt: 'archivedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+export const ProfileAnswerScalarFieldEnum = {
+    userId: 'userId',
+    fieldId: 'fieldId',
+    value: 'value',
     updatedAt: 'updatedAt'
 };
 export const CertificationScalarFieldEnum = {
     id: 'id',
     userId: 'userId',
-    title: 'title',
-    issuer: 'issuer',
-    credentialId: 'credentialId',
+    cycleNo: 'cycleNo',
+    data: 'data',
+    fileId: 'fileId',
     status: 'status',
-    startedAt: 'startedAt',
-    completedAt: 'completedAt',
-    expiresAt: 'expiresAt',
-    fileUrl: 'fileUrl',
-    notes: 'notes',
+    uploadedAt: 'uploadedAt',
+    lapsedAt: 'lapsedAt',
     createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
+};
+export const StoredFileScalarFieldEnum = {
+    id: 'id',
+    ownerId: 'ownerId',
+    storedName: 'storedName',
+    originalName: 'originalName',
+    mime: 'mime',
+    size: 'size',
+    createdAt: 'createdAt'
+};
+export const SettingScalarFieldEnum = {
+    key: 'key',
+    value: 'value',
     updatedAt: 'updatedAt'
 };
-export const RefreshTokenScalarFieldEnum = {
+export const AuditLogScalarFieldEnum = {
     id: 'id',
-    userId: 'userId',
-    tokenHash: 'tokenHash',
-    expiresAt: 'expiresAt',
-    revokedAt: 'revokedAt',
+    actorId: 'actorId',
+    action: 'action',
+    entity: 'entity',
+    entityId: 'entityId',
+    before: 'before',
+    after: 'after',
     createdAt: 'createdAt'
 };
 export const SortOrder = {
     asc: 'asc',
     desc: 'desc'
+};
+export const NullableJsonNullValueInput = {
+    DbNull: DbNull,
+    JsonNull: JsonNull
+};
+export const JsonNullValueInput = {
+    JsonNull: JsonNull
 };
 export const QueryMode = {
     default: 'default',
@@ -79,6 +157,11 @@ export const QueryMode = {
 export const NullsOrder = {
     first: 'first',
     last: 'last'
+};
+export const JsonNullValueFilter = {
+    DbNull: DbNull,
+    JsonNull: JsonNull,
+    AnyNull: AnyNull
 };
 export const defineExtension = runtime.Extensions.defineExtension;
 //# sourceMappingURL=prismaNamespace.js.map

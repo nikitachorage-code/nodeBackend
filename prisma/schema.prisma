@@ -11,62 +11,192 @@ datasource db {
 
 enum Role {
   ADMIN
+  USER
+}
+
+enum UserStatus {
   CANDIDATE
-  DIPLOMAT // a candidate who has completed at least one certification
+  DIPLOMATE
 }
 
 enum CertificationStatus {
-  IN_PROGRESS
-  COMPLETED
+  ACTIVE
+  LAPSED
+}
+
+enum FieldType {
+  TEXT
+  LONG_TEXT
+  NUMBER
+  DATE
+  DROPDOWN
+  CHECKBOX
+  FILE
+}
+
+enum EmailTokenType {
+  VERIFY
+  RESET
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  role         Role     @default(CANDIDATE)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String     @id @default(uuid())
+  email           String     @unique
+  passwordHash    String     @map("password_hash")
+  role            Role       @default(USER)
+  name            String
+  status          UserStatus @default(CANDIDATE)
+  emailVerifiedAt DateTime?  @map("email_verified_at")
+  onboardedAt     DateTime?  @map("onboarded_at")
 
+  // Cached values, always rebuildable from certification records (sync service).
+  cycleStartDate   DateTime? @map("cycle_start_date")
+  cycleNo          Int       @default(0) @map("cycle_no")
+  progressCount    Int       @default(0) @map("progress_count")
+  atRisk           Boolean   @default(false) @map("at_risk")
+  warningSentCycle Int?      @map("warning_sent_cycle")
+
+  // Denormalised copies of profile/certification values for search and sort.
+  passportNo String? @map("passport_no")
+  lastCertNo String? @map("last_cert_no")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  emailTokens    EmailToken[]
+  profileAnswers ProfileAnswer[]
   certifications Certification[]
-  refreshTokens  RefreshToken[]
+  files          StoredFile[]
 
-  @@index([role])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model EmailToken {
+  id        String         @id @default(uuid())
+  userId    String         @map("user_id")
+  type      EmailTokenType
+  tokenHash String         @unique @map("token_hash")
+  expiresAt DateTime       @map("expires_at")
+  usedAt    DateTime?      @map("used_at")
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@map("email_tokens")
+}
+
+model Step {
+  id         String   @id @default(uuid())
+  key        String   @unique
+  title      String
+  order      Int
+  enabled    Boolean  @default(true)
+  system     Boolean  @default(false)
+  // Profile steps are filled once; the certification step is repeatable.
+  repeatable Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  fields Field[]
+
+  @@map("steps")
+}
+
+model Field {
+  id         String    @id @default(uuid())
+  stepId     String    @map("step_id")
+  key        String
+  label      String
+  type       FieldType
+  required   Boolean   @default(false)
+  helpText   String?   @map("help_text")
+  visible    Boolean   @default(true)
+  options    Json?
+  order      Int
+  system     Boolean   @default(false)
+  archivedAt DateTime? @map("archived_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  step    Step            @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  answers ProfileAnswer[]
+
+  @@unique([stepId, key])
+  @@map("fields")
+}
+
+model ProfileAnswer {
+  userId    String   @map("user_id")
+  fieldId   String   @map("field_id")
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  field Field @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  @@id([userId, fieldId])
+  @@map("profile_answers")
 }
 
 model Certification {
-  id           String              @id @default(uuid())
-  userId       String
-  title        String
-  issuer       String
-  credentialId String?
-  status       CertificationStatus @default(IN_PROGRESS)
-  startedAt    DateTime?
-  completedAt  DateTime?
-  expiresAt    DateTime?
-  fileUrl      String?
-  notes        String?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+  id         String              @id @default(uuid())
+  userId     String              @map("user_id")
+  cycleNo    Int                 @map("cycle_no")
+  data       Json
+  fileId     String?             @map("file_id")
+  status     CertificationStatus @default(ACTIVE)
+  uploadedAt DateTime            @map("uploaded_at") // immutable, server time
+  lapsedAt   DateTime?           @map("lapsed_at")
+  createdAt  DateTime            @default(now()) @map("created_at")
+  updatedAt  DateTime            @updatedAt @map("updated_at")
+  deletedAt  DateTime?           @map("deleted_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  file StoredFile? @relation(fields: [fileId], references: [id])
 
   @@index([userId, status])
-  @@index([expiresAt])
+  @@index([userId, cycleNo])
+  @@map("certifications")
 }
 
-model RefreshToken {
-  id        String    @id @default(uuid())
-  userId    String
-  tokenHash String    @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-  createdAt DateTime  @default(now())
+model StoredFile {
+  id           String   @id @default(uuid())
+  ownerId      String   @map("owner_id")
+  storedName   String   @unique @map("stored_name")
+  originalName String   @map("original_name")
+  mime         String
+  size         Int
+  createdAt    DateTime @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  owner          User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  certifications Certification[]
 
-  @@index([userId])
+  @@map("files")
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?  @map("actor_id")
+  action    String
+  entity    String
+  entityId  String?  @map("entity_id")
+  before    Json?
+  after     Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
